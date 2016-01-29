@@ -16,7 +16,8 @@ function initSprites(sprite, spriteWidth, spriteHeight, nbLinesOfSprites, nbSpri
         var sprite = new Sprite(ctx, sprite, 0, yLineForCurrentDir,
             spriteWidth, spriteHeight,
             nbSpritesPerLine,
-            3); // draw every 1s
+            3	// draw every 1s
+		); 
         spritesLink[i] = sprite;
     }
 }
@@ -34,8 +35,8 @@ window.onload = function init() {
 
         // info about sprite
 		var NB_FRAMES = 16;
-        var SPRITE_WIDTH = 128 / NB_FRAMES; // 8
-        var SPRITE_HEIGHT = 192 / NB_FRAMES; // 12
+        var SPRITE_WIDTH = 8; // 128 / NB_FRAMES -> 8
+        var SPRITE_HEIGHT = 12; // 192 / NB_FRAMES -> 12
         var nbLinesOfSprites = 4;
 		var nbSpritesPerLine = 4;
 
@@ -63,11 +64,9 @@ var GF = function () {
     
     var level1 = new Map("level1");
 
-    // The player
     //var player = new Character("guy.png", 7, 14, DIRECTION.DOWN);
     //level1.addCharacter(player);
 
-    // obstacles
     var obstacles = [];
 	
 	var monster = {
@@ -76,17 +75,16 @@ var GF = function () {
         y: 10,
         width: 35,
         height: 50,
-        speed: 300 // pixels/s this time !
+        speed: 300    // pixels / s 
     };
   
-    // array of balls to animate
     var balls = [];
     var nbBalls = 5;
 	
-	DIR_S= 1;
-    DIR_W= 2;
-    DIR_N = 4;
-    DIR_E = 3;
+	DIR_S = 1; // player walk to the south
+    DIR_W = 2; // player walk to the west
+    DIR_N = 4; // player walk to the north
+    DIR_E = 3; // player walk to the east
     var dir = DIR_S;
     var moving = false;
     var scale = 0.5;
@@ -117,7 +115,7 @@ var GF = function () {
         switch (currentGameState) {
             case gameStates.gameRunning:
 
-                // draw the map & the character
+                // draw the map
                 level1.drawMap(ctx);
 				
 				updateMonsterPosition(delta);
@@ -128,7 +126,7 @@ var GF = function () {
                     balls[i].updatePosition(ctx, canvas, delta, monster, plopSound);
                 }
                 
-                //update and draw obstacle
+                //update and draw obstacle(s)
                 length = obstacles.length;
                 for(i = 0; i < length; i++) {
                     obstacles[i].updatePosition(ctx, canvas, delta);
@@ -138,10 +136,9 @@ var GF = function () {
                 displayScore();
 
                 // decrease currentLevelTime. 
-                // When < 0 go to next level
                 currentLevelTime -= delta;
 
-                if (currentLevelTime < 0) {
+				if (currentLevelTime < 0) {
                     goToNextLevel();
                 }
 
@@ -184,7 +181,6 @@ var GF = function () {
         // reset time available for next level
         currentLevelTime = 5000;
         currentLevel++;
-        // Add two balls per level
         nbBalls += 2;
         createBalls(nbBalls);
     }
@@ -221,10 +217,10 @@ var GF = function () {
             dir = DIR_S;
             moving = true;
         }
-        if (inputStates.space) {
-        }
-        if (inputStates.mousePos) {
-        }
+        if (inputStates.space) { }
+		
+        if (inputStates.mousePos) { }
+		
         if (inputStates.mousedown) {
             //monster.speed = 500;
         } else {
@@ -263,9 +259,11 @@ var GF = function () {
 
             // Do not create a ball on the monster. We augmented the ball radius 
             // to sure the ball is created far from the monster.
-            if (!circRectsOverlap(monster.x, monster.y, monster.width, monster.height,
-                    ball.x, ball.y, ball.radius * 3)) {
-                // Add it to the array
+            if (
+				!circRectsOverlap(
+					monster.x, monster.y, monster.width, monster.height, ball.x, ball.y, ball.radius * 3
+				)
+			) {
                 balls.push(ball);
             } else {
                 i--;
@@ -292,7 +290,7 @@ var GF = function () {
             autoplay: false,
             volume: 1,
             onload: function () {
-                //console.log("all sounds loaded");
+                console.log("all sounds loaded");
                 // We're done!
                 callback();
             }
@@ -302,7 +300,6 @@ var GF = function () {
     var start = function () {
 		initFPSCounter();
 
-        // Canvas, context etc.
         canvas = document.querySelector("#gameCanvas");
 
         // map
@@ -310,7 +307,7 @@ var GF = function () {
     	canvas.height = level1.getHeight() * 32;
 
         ctx = canvas.getContext('2d');
-        ctx.font = "20px Arial";
+        ctx.font = "bold 24px Arial";
 		
 		// Create the different key and mouse listeners
         addListeners(inputStates, canvas);

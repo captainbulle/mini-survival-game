@@ -18,6 +18,7 @@ function SpriteImage(ctx, sprite, x, y, width, height) {
 		console.log("width " + this.width);
 		console.log("height " + this.height);
 		console.log("scale " + scale);
+		// Not working :(
         this.ctx.drawImage(this.sprite,
             this.x, this.y,
             this.width, this.height,

@@ -1,21 +1,18 @@
-function Sprite(ctx, spritesheet, x, y, width, height, nbImages, nbFramesOfAnimationBetweenRedraws) {
+function Sprite(ctx, sprite, x, y, width, height, nbImages, nbFramesOfAnimationBetweenRedraws) {
     this.spriteImages = [];
     this.currentFrame = 0;
     this.nbFrames = nbImages;
     this.nbTicksBetweenRedraws = nbFramesOfAnimationBetweenRedraws;
-    this.nbCurrentTicks=0;
-    this.ctx = ctx;
+    this.nbCurrentTicks = 0;
 
     // let's process the row in the big image, and extract all sprites for a given posture of animation
-	console.log("nbImage " + nbImages);
-    for(var i = 0; i < nbImages; i++) {
+	for(var i = 0; i < nbImages; i++) {
         // we extract the subimage
-        this.spriteImages[i] = new SpriteImage(this.ctx, spritesheet, x + i*width, y, width, height);
+        this.spriteImages[i] = new SpriteImage(ctx, sprite, x + i*width, y, width, height);
     }
 
     this.renderMoving = function(x, y, scale) {
-        // renders animated sprite, changed every nbTicksBetweenRedraws
-        // the frame number
+        // renders animated sprite, changed every nbTicksBetweenRedraws the frame number
 
         // draw the sprite with the current image
         this.spriteImages[this.currentFrame].render(x, y, scale);
@@ -32,6 +29,7 @@ function Sprite(ctx, spritesheet, x, y, width, height, nbImages, nbFramesOfAnima
             this.nbCurrentTicks = 0;
         }
     };
+	
     this.render = function(x, y, scale) {
         // draws always frame 0, static position
         this.spriteImages[0].render(x, y, scale);
