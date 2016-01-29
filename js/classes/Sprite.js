@@ -4,7 +4,8 @@ function Sprite(ctx, sprite, x, y, width, height, nbImages, nbFramesOfAnimationB
     this.nbFrames = nbImages;
     this.nbTicksBetweenRedraws = nbFramesOfAnimationBetweenRedraws;
     this.nbCurrentTicks = 0;
-
+	
+	console.info(width  + " : "  + height );
     // let's process the row in the big image, and extract all sprites for a given posture of animation
 	for(var i = 0; i < nbImages; i++) {
         // we extract the subimage

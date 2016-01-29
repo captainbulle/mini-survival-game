@@ -12,36 +12,18 @@ function initSprites(sprite, spriteWidth, spriteHeight, nbLinesOfSprites, nbSpri
     // sprite extraction
     for(var i = 0; i < nbLinesOfSprites; i++) {
         var yLineForCurrentDir = i*spriteHeight;
-
-        var sprite = new Sprite(ctx, sprite, 0, yLineForCurrentDir,
+        var spr = new Sprite(ctx, sprite, 0, yLineForCurrentDir,
             spriteWidth, spriteHeight,
             nbSpritesPerLine,
             3	// draw every 1s
-		); 
-        spritesLink[i] = sprite;
+        );
+        spritesLink[i] = spr;
     }
 }
 
 // Inits
 window.onload = function init() {
     var game = new GF();
-	
-	// load the sprite
-    sprite = new Image();
-    sprite.src = "sprites/guy.png";
-	console.log(sprite.src);
-
-    sprite.onload = function() {
-
-        // info about sprite
-		var NB_FRAMES = 16;
-        var SPRITE_WIDTH = 8; // 128 / NB_FRAMES -> 8
-        var SPRITE_HEIGHT = 12; // 192 / NB_FRAMES -> 12
-        var nbLinesOfSprites = 4;
-		var nbSpritesPerLine = 4;
-
-        initSprites(sprite, SPRITE_WIDTH, SPRITE_HEIGHT, nbLinesOfSprites, nbSpritesPerLine);
-    };
     game.start();
 };
 
@@ -56,20 +38,20 @@ var GF = function () {
         gameRunning: 1,
         gameOver: 2
     };
-	
+
     var currentGameState = gameStates.gameRunning;
     var currentLevel = 1;
-    var TIME_BETWEEN_LEVELS = 5000; 
+    var TIME_BETWEEN_LEVELS = 5000;
     var currentLevelTime = TIME_BETWEEN_LEVELS;
-    
+
     var level1 = new Map("level1");
 
     //var player = new Character("guy.png", 7, 14, DIRECTION.DOWN);
     //level1.addCharacter(player);
 
     var obstacles = [];
-	
-	var monster = {
+
+    var monster = {
         dead: false,
         x: 10,
         y: 10,
@@ -77,19 +59,19 @@ var GF = function () {
         height: 50,
         speed: 300    // pixels / s 
     };
-  
+
     var balls = [];
     var nbBalls = 5;
-	
-	DIR_S = 1; // player walk to the south
-    DIR_W = 2; // player walk to the west
-    DIR_N = 4; // player walk to the north
-    DIR_E = 3; // player walk to the east
+
+    DIR_S = 0; // player walk to the south
+    DIR_W = 1; // player walk to the west
+    DIR_E = 2; // player walk to the east
+    DIR_N = 3; // player walk to the north
     var dir = DIR_S;
     var moving = false;
-    var scale = 0.5;
-	
-	document.onkeyup = function(e) {
+    var scale = 1;
+
+    document.onkeyup = function(e) {
         moving = false;
     };
 
@@ -97,7 +79,7 @@ var GF = function () {
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-    
+
     var mainLoop = function (time) {
         //main function, called each frame 
         measureFPS(time);
@@ -117,29 +99,33 @@ var GF = function () {
 
                 // draw the map
                 level1.drawMap(ctx);
-				
-				updateMonsterPosition(delta);
+                updateMonsterPosition(delta);
 
                 // update and draw balls
                 var length = balls.length;
                 for(var i = 0; i < length; i++) {
                     balls[i].updatePosition(ctx, canvas, delta, monster, plopSound);
                 }
-                
-                //update and draw obstacle(s)
+
+                // update and draw obstacle(s)
                 length = obstacles.length;
                 for(i = 0; i < length; i++) {
                     obstacles[i].updatePosition(ctx, canvas, delta);
                 }
-            
+
                 // display Score
                 displayScore();
 
                 // decrease currentLevelTime. 
                 currentLevelTime -= delta;
 
-				if (currentLevelTime < 0) {
+                if (currentLevelTime < 0) {
                     goToNextLevel();
+                }
+                if(!moving) {
+                    spritesLink[dir].render(monster.x-5, monster.y-10, scale);
+                } else {
+                    spritesLink[dir].renderMoving(monster.x, monster.y, scale);
                 }
 
                 break;
@@ -148,7 +134,7 @@ var GF = function () {
                 break;
             case gameStates.gameOver:
                 ctx.fillText("GAME OVER", 50, 100);
-				ctx.fillText("Congratulations, you made to the level " + currentLevel, 50, 150);
+                ctx.fillText("Congratulations, you made to the level " + currentLevel, 50, 150);
                 ctx.fillText("Press SPACE to start again", 50, 200);
                 ctx.fillText("Move with arrow keys", 50, 250);
                 ctx.fillText("Survive 5 seconds for next level", 50, 300);
@@ -157,17 +143,11 @@ var GF = function () {
                 }
                 break;
         }
-		
-		if(!moving) {
-            spritesLink[dir].render(monster.x-5, monster.y-10, scale);
-        } else {
-            spritesLink[dir].renderMoving(monster.x, monster.y, scale);
-        }
 
         // call the animation loop every 1/60th of second
         requestAnimationFrame(mainLoop);
     };
-  
+
     function startNewGame() {
         monster.dead = false;
         currentLevelTime = 5000;
@@ -193,8 +173,8 @@ var GF = function () {
         ctx.fillText("Balls: " + nbBalls, 900, 90);
         ctx.restore();
     }
-	
-	function updateMonsterPosition(delta) {
+
+    function updateMonsterPosition(delta) {
         monster.speedX = monster.speedY = 0;
 
         if (inputStates.left) {
@@ -218,9 +198,9 @@ var GF = function () {
             moving = true;
         }
         if (inputStates.space) { }
-		
+
         if (inputStates.mousePos) { }
-		
+
         if (inputStates.mousedown) {
             //monster.speed = 500;
         } else {
@@ -244,26 +224,26 @@ var GF = function () {
     function createBalls(numberOfBalls) {
         // Start from an empty array
         balls = [];
-		
-		var radius = 15;
-		var ball = new Array();
+
+        var radius = 15;
+        var ball = new Array();
         for (var i = 0; i < numberOfBalls; i++) {
             // Create a ball with random position and speed.
             ball = new Ball(
-				canvas.width * Math.random(),  // x
-				canvas.height * Math.random(), // y
-				2 * Math.PI * Math.random(),   // angle
-				80 * Math.random(),            // speed
-				radius
-			);
+                canvas.width * Math.random(),  // x
+                canvas.height * Math.random(), // y
+                2 * Math.PI * Math.random(),   // angle
+                80 * Math.random(),            // speed
+                radius
+            );
 
             // Do not create a ball on the monster. We augmented the ball radius 
             // to sure the ball is created far from the monster.
             if (
-				!circRectsOverlap(
-					monster.x, monster.y, monster.width, monster.height, ball.x, ball.y, ball.radius * 3
-				)
-			) {
+                !circRectsOverlap(
+                    monster.x, monster.y, monster.width, monster.height, ball.x, ball.y, ball.radius * 3
+                )
+            ) {
                 balls.push(ball);
             } else {
                 i--;
@@ -278,45 +258,79 @@ var GF = function () {
 
         obstacles.push(new Obstacle(300, 0, 20, 200, 0, 0));
     }
-    
-    function loadAssets(callback) {
-        // here we should load the souds, the sprite sheets etc.
-        // then at the end call the callback function
 
-        // simple example that loads a sound and then calls the callback. We used the howler.js WebAudio lib here.
-        // Load sounds asynchronously using howler.js
-        plopSound = new Howl({
-            urls: ['http://mainline.i3s.unice.fr/mooc/plop.mp3'],
-            autoplay: false,
-            volume: 1,
-            onload: function () {
-                console.log("all sounds loaded");
-                // We're done!
-                callback();
+    function loadAssets(callback) {
+        loadSoundsAsset().then(function(response){
+                loadGuyAsset().then(function(response){
+                    callback();
+                });
             }
-        });
+        );
     }
-    
+
+    var loadSoundsAsset = function(){
+        return new Promise(function(resolve, reject){
+            // here we should load the souds, the sprite sheets etc.
+            // then at the end call the callback function
+
+            // simple example that loads a sound and then calls the callback. We used the howler.js WebAudio lib here.
+            // Load sounds asynchronously using howler.js
+            plopSound = new Howl({
+                urls: ['http://mainline.i3s.unice.fr/mooc/plop.mp3'],
+                autoplay: false,
+                volume: 1,
+                onload: function () {
+                    console.log("all sounds loaded");
+                    resolve("");
+                }
+            });
+        });
+    };
+
+    var loadGuyAsset = function(){
+        sprite = new Image();
+        sprite.src = "sprites/guy.png";
+
+        console.log(sprite.src);
+        console.info(ctx);
+
+        var promise = new Promise(function(resolve, reject){
+            sprite.onload = function() {
+                // info about sprite
+                var NB_FRAMES = 16;
+                var SPRITE_WIDTH = 32; // 128 / nbSpritesPerLine -> 32
+                var SPRITE_HEIGHT = 48; // 192 / nbLinesOfSprites -> 48
+                var nbLinesOfSprites = 4;
+                var nbSpritesPerLine = 4;
+
+                initSprites(sprite, SPRITE_WIDTH, SPRITE_HEIGHT, nbLinesOfSprites, nbSpritesPerLine);
+                console.info("guy loaded");
+                resolve("");
+            };
+        });
+        return promise;
+    };
+
     var start = function () {
-		initFPSCounter();
+        initFPSCounter();
 
         canvas = document.querySelector("#gameCanvas");
 
         // map
         canvas.width = level1.getWidth() * 32;
-    	canvas.height = level1.getHeight() * 32;
+        canvas.height = level1.getHeight() * 32;
 
         ctx = canvas.getContext('2d');
         ctx.font = "bold 24px Arial";
-		
-		// Create the different key and mouse listeners
+
+        // Create the different key and mouse listeners
         addListeners(inputStates, canvas);
-        
+
         // We create the balls
         createBalls(nbBalls);
-        
+
         createObstacles();
-        
+
         loadAssets(function () {
             // all assets (images, sounds) loaded, we can start the animation
             requestAnimationFrame(mainLoop);
